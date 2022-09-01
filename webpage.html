@@ -6,19 +6,34 @@
 </head>
 <body>
 	<h2 style="text-align:center">MPU6050 data</h2>
-	<table>
+	<table class="dataTable">
 		<tr>
 			<td>
-				<h5 class="grid-item"style="text-align:left">Accelerometer in X-axis : </h5>
-				<input type="text" id="Xa" name="Xa"></input>
+				<h5 class="grid-item" style="text-align:left">Accelerometer in X-axis : </h5>
+				<input class="sensorReadings" type="hidden" id="Xa" name="Xa" autofocus readonly></input>
 			</td>
-			<td><h5 class="grid-item"style="text-align:left">Accelerometer in Y-axis : </h5></td>
-			<td><h5 class="grid-item"style="text-align:left">Accelerometer in Z-axis : </h5></td>
+			<td>
+				<h5 class="grid-item" style="text-align:left">Accelerometer in Y-axis : </h5>
+				<input class="sensorReadings" type="hidden" id="Ya" name="Ya" autofocus readonly></input>
+			</td>
+			<td>
+				<h5 class="grid-item" style="text-align:left">Accelerometer in Z-axis : </h5>
+				<input class="sensorReadings" type="hidden" id="Za" name="Za" autofocus readonly></input>
+			</td>
 		</tr>
 		<tr>
-			<td><h5 class="grid-item"style="text-align:left">Gyroscope in X-axis : </h5></td>
-			<td><h5 class="grid-item"style="text-align:left">Gyroscope in Y-axis : </h5></td>
-			<td><h5 class="grid-item"style="text-align:left">Gyroscope in Z-axis : </h5></td>
+			<td>
+				<h5 class="grid-item" style="text-align:left">Gyroscope in X-axis : </h5>
+				<input class="sensorReadings" type="hidden" id="Xr" name="Xr" autofocus readonly></input>
+			</td>
+			<td>
+				<h5 class="grid-item" style="text-align:left">Gyroscope in Y-axis : </h5>
+				<input class="sensorReadings" type="hidden" id="Yr" name="Yr" autofocus readonly></input>
+			</td>
+			<td>
+				<h5 class="grid-item" style="text-align:left">Gyroscope in Z-axis : </h5>
+				<input class="sensorReadings" type="hidden" id="Za" name="Zr" autofocus readonly></input>
+			</td>
 		</tr>
 	</table>
 	<div>
