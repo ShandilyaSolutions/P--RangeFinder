@@ -14,13 +14,16 @@ table {
     background-color: azure;
 }
 tr {
+    height: 80px;
     border: 1px;
     border-style: solid;
+    vertical-align: middle;
+    text-align: center;
 }
 td {
     border: 1px ;
     border-style: solid;
-    height: 100px;
+    height: 80px;
     text-align: left;
     vertical-align: middle;
 }
@@ -45,4 +48,16 @@ h4 {
     font-size: 20px;
     font-style: italic;
     font-weight: lighter;
+}
+.sensorReadings {
+    width: 70px;
+    height: 30px;
+    padding: 5px;
+    position: relative;
+    left: 230px;
+    bottom: 60px;
+    margin-right: 10px;
+}
+.dataTable {
+    text-align: center;
 }
