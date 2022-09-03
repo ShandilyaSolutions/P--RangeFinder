@@ -1,26 +1,50 @@
 #include <Adafruit_MPU6050.h> //For Interfacing with MPU6050
 #include <Adafruit_Sensor.h>
 #include <Wire.h> //For implementing I2C communication protocol
+#include <WiFiManager.h> //For WiFi
 
-Adafruit_MPU6050 mpu; //
+Adafruit_MPU6050 mpu; //creates an instance of Adafruit_MPU6050 class
+WiFiManager wm; //creates an instance of WiFiManager class
 
-void setup(void) {
-  Serial.begin(115200);
-  //Works on connection with MPU6050 
+//Global Variables
+bool res; //to report the result of WiFi connection attempt done by us
+
+void setupWiFi(){
+  //Function to setup WiFi
   while (!Serial)
-    delay(10); // will pause Zero, Leonardo, etc until serial console opens
+    delay(10); //it will pause the board until Serial Monitor is opened
+  WiFi.mode(WIFI_STA); //Setts the esp32 in station mode so that it can connect to the Wifi network
+
+  res = wm.autoConnect("AutoConnectAP","password"); //Autoconnect to password protected Access point
+
+  if(!res) {
+    Serial.println("Failed to connect");
+    // ESP.restart();
+  } 
+  else {
+    //if you get here you have connected to the WiFi    
+    Serial.println("connected...yeey :)");
+  }
+}
+
+void setupMPU6050(){
+  //Function to setup MPU6050 chip
+  while(!Serial)
+    delay(10); //it will pause the board until Serial Monitor is opened
 
   Serial.println("Adafruit MPU6050 test!");
 
-  // Try to initialize!
-  if (!mpu.begin()) {
+  //Try to initialize
+  if(!mpu.begin()){
     Serial.println("Failed to find MPU6050 chip");
-    while (1) {
+    while(1){
       delay(10);
+      //pause the code indefinitely
     }
   }
-  Serial.println("MPU6050 Found!");
+  Serial.println("MPU6050 found!");
 
+  //Setting up the chip sensor range and filter bandwidth
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G); //Sets accelerometer measurement range
     //Range selected is +- 8g, other values are +- 2g (default), +- 4g, +- 16g
   Serial.print("Accelerometer range set to: ");
@@ -87,17 +111,28 @@ void setup(void) {
   }
 
   Serial.println("");
+}
+
+void setup(void) {
+  Serial.begin(115200);
+  
+  /*We need to setup WiFi before MPU6050 chip.*/
+  //Calling the function to setup WiFi connection
+  setupWiFi();
+  
+  //Calling the function to setup the MPU6050 chip
+  setupMPU6050();
+    
   delay(100);
 }
 
 void loop() {
-
-  /* Get new sensor events with the readings */
-  //sensors_event_t a, g, temp; (original)
+  /* Get new sensor events with the readings. We will get all the data, but not display the temperature as it is not required for our application.
+      The option to not fetch the temp data was not supported by the library as it caused errors on compilation.*/
+  sensors_event_t a, g, temp;
   //a = accelerometer, g = gyroscope, temp = temperature sensor
-  sensors_event_t a, g; //no need of temp data now
-  //mpu.getEvent(&a, &g, &temp); (original)
-  mpu.getEvent(&a, &g);
+  mpu.getEvent(&a, &g, &temp);
+
 
   /* Print out the values */
   Serial.print("Acceleration X: ");
