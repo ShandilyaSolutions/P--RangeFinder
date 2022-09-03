@@ -118,12 +118,15 @@ void setup(void) {
   
   /*We need to setup WiFi before MPU6050 chip.*/
   //Calling the function to setup WiFi connection
-  setupWiFi();
-  
-  //Calling the function to setup the MPU6050 chip
-  setupMPU6050();
-    
-  delay(100);
+  int a = setupWiFi();
+  if (a==1){
+      Serial.println("Connected to WiFi Successfully.");
+      //Calling the function to setup the MPU6050 chip
+      int b = setupMPU6050();
+      if (b==1){
+        Serial.println("MPU6050 chip set successfully!");
+      }
+  }
 }
 
 void loop() {
