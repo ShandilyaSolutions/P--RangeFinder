@@ -2,6 +2,7 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h> //For implementing I2C communication protocol
 #include <WiFiManager.h> //For WiFi
+#include <ArduinoJson.h> //For data transfer using JSON
 
 Adafruit_MPU6050 mpu; //creates an instance of Adafruit_MPU6050 class
 WiFiManager wm; //creates an instance of WiFiManager class
@@ -130,34 +131,25 @@ void setup(void) {
 }
 
 void loop() {
-  /* Get new sensor events with the readings. We will get all the data, but not display the temperature as it is not required for our application.
+
+  /* Get new sensor events with the readings. We will get all the data but not display the temperature as it is not required for our application.
       The option to not fetch the temp data was not supported by the library as it caused errors on compilation.*/
   sensors_event_t a, g, temp;
   //a = accelerometer, g = gyroscope, temp = temperature sensor
   mpu.getEvent(&a, &g, &temp);
 
+  /*writing sensor readings into the json document*/
+  doc["Xa"]= a.acceleration.x;
+  doc["Ya"]= a.acceleration.y;
+  doc["Za"]= a.acceleration.z;
+  doc["Xr"]= g.gyro.x;
+  doc["Yr"]= g.gyro.y;
+  doc["Zr"]= g.gyro.z;
 
-  /* Print out the values */
-  Serial.print("Acceleration X: ");
-  Serial.print(a.acceleration.x);
-  Serial.print(", Y: ");
-  Serial.print(a.acceleration.y);
-  Serial.print(", Z: ");
-  Serial.print(a.acceleration.z);
-  Serial.println(" m/s^2");
+  serializeJson(doc,output);// Write JSON to output buffer
+  // Alternatively generate a prettified JSON document
+  //serializeJsonPretty(doc, output);
 
-  Serial.print("Rotation X: ");
-  Serial.print(g.gyro.x);
-  Serial.print(", Y: ");
-  Serial.print(g.gyro.y);
-  Serial.print(", Z: ");
-  Serial.print(g.gyro.z);
-  Serial.println(" rad/s");
-
-  // Serial.print("Temperature: ");
-  // Serial.print(temp.temperature);
-  // Serial.println(" degC");
-  /*No need for temperature sensor readings*/
   
   Serial.println("");
   delay(500);
