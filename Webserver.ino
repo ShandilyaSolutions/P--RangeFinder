@@ -2,16 +2,32 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h> //For implementing I2C communication protocol
 #include <WiFiManager.h> //For WiFi
-#include <ArduinoJson.h> //For data transfer using JSON
+#include <ArduinoJson.h> //For Data transfer using JSON 
+
+/*Libraries for Websocket*/
+#include <WebSocketsServer.h> //For WebSocket Server creation
+#include <WebServer.h>
 
 Adafruit_MPU6050 mpu; //creates an instance of Adafruit_MPU6050 class
 WiFiManager wm; //creates an instance of WiFiManager class
 
+
 //Global Variables
 bool res; //to report the result of WiFi connection attempt done by us
+char output[1024];//buffer to hold output results. Size of 1024 i.e. 2^10 is picked arbitarily
+int interval = 100; // virtual delay of 100ms
+unsigned long previousMillis = 0; // Tracks the time since last event fired
 
-void setupWiFi(){
-  //Function to setup WiFi
+//Creating JSON document
+const int capacity = JSON_OBJECT_SIZE(6);
+StaticJsonDocument<capacity> doc;
+
+WebServer server(80);  // create instance for web server on port "80"
+WebSocketsServer webSocket = WebSocketsServer(81);  //create instance for webSocket server on port"81"
+
+String web = "<!DOCTYPE html><html><head><title>ESP32 WebServer</title><style>h2 { font-family: "Georgia", Times, serif; font-style: italic; font-weight: bolder; font-size: 25px; color: #f05513; text-shadow: 3px 3px 3px #ababab;}table { border: 1px; border-style: solid; border-collapse: collapse; width: 100%; background-color: azure;}tr { height: 80px; border: 1px; border-style: solid; vertical-align: middle; text-align: center;}td { border: 1px ; border-style: solid; height: 80px; text-align: left; vertical-align: middle;}h5 { margin-left: 25px; font-family: "Georgia", Times, serif; font-style: normal; font-size: medium; font-weight: normal; text-shadow: 3px 3px 3px #ababab;}p { color: black; font-size: 15px; font-family: "Georgia", Times, serif;}div { text-align: left;}h4 { font-family: Georgia, 'Times New Roman', Times, serif; font-size: 20px; font-style: italic; font-weight: lighter;}.sensorReadings { width: 70px; height: 30px; padding: 5px; position: relative; left: 230px; bottom: 60px; margin-right: 10px;}.dataTable { text-align: center;}</style></head><body><script>var Socket; //holds the socket objectfunction init() { Socket = new WebSocket('ws://'+window.location.hostname+':81'); // Asks to connect to a web socket server with the IP address on 81 Socket.onmessage = function(event) { // onmessage event occures everytime new sensor data is received and we call the processCommand function processCommand(event); };}function processCommand(event) { //this function is used to parse the incoming JSON holding sensor data and puts it's value in their respective places var obj = JSON.parse(event.data); //inserting the data of accelerometer & gyroscope document.getElementById('Xa').innerHTML=obj.Xa; document.getElementById('Ya').innerHTML=obj.Ya; document.getElementById('Za').innerHTML=obj.Za; document.getElementById('Xr').innerHTML=obj.Xr; document.getElementById('Yr').innerHTML=obj.Yr; document.getElementById('Zr').innerHTML=obj.Zr; //displaying the variables console.log("Acceleration in X :",obj.Xa); console.log("Acceleration in Y :",obj.Ya); console.log("Acceleration in Z :",obj.Za); console.log("Rotation in X : ",obj.Xr); console.log("Rotation in Y : ",obj.Yr); console.log("Rotation in Z : ",obj.Zr); }window.onload = function(event){ init();}</script><h2 style="text-align:center">MPU6050 data</h2><table class="dataTable"><tr><td><h5 class="grid-item" style="text-align:left">Accelerometer in X-axis : </h5><input class="sensorReadings" type="hidden" id="Xa" name="Xa" autofocus readonly></input></td><td><h5 class="grid-item" style="text-align:left">Accelerometer in Y-axis : </h5><input class="sensorReadings" type="hidden" id="Ya" name="Ya" autofocus readonly></input></td><td><h5 class="grid-item" style="text-align:left">Accelerometer in Z-axis : </h5><input class="sensorReadings" type="hidden" id="Za" name="Za" autofocus readonly></input></td></tr><tr><td><h5 class="grid-item" style="text-align:left">Gyroscope in X-axis : </h5><input class="sensorReadings" type="hidden" id="Xr" name="Xr" autofocus readonly></input></td><td><h5 class="grid-item" style="text-align:left">Gyroscope in Y-axis : </h5><input class="sensorReadings" type="hidden" id="Yr" name="Yr" autofocus readonly></input></td><td><h5 class="grid-item" style="text-align:left">Gyroscope in Z-axis : </h5><input class="sensorReadings" type="hidden" id="Za" name="Zr" autofocus readonly></input></td></tr></table><div><!--<br> tag is used for printing new line on the screen for cleaner look--><br><br><h4><u>Percentage Error : </u></h4><p>Accelerometer X : </p><p>Accelerometer Y : </p><p>Accelerometer Z : </p><p>Gyroscope X : </p><p>Gyroscope Y : </p><p>Gyroscope Z : </p></div></body></html";
+
+int setupWiFi(){
   while (!Serial)
     delay(10); //it will pause the board until Serial Monitor is opened
   WiFi.mode(WIFI_STA); //Setts the esp32 in station mode so that it can connect to the Wifi network
@@ -26,10 +42,10 @@ void setupWiFi(){
     //if you get here you have connected to the WiFi    
     Serial.println("connected...yeey :)");
   }
+  return 1;
 }
 
-void setupMPU6050(){
-  //Function to setup MPU6050 chip
+int setupMPU6050(){
   while(!Serial)
     delay(10); //it will pause the board until Serial Monitor is opened
 
@@ -112,9 +128,53 @@ void setupMPU6050(){
   }
 
   Serial.println("");
+  return 1;
 }
 
-void setup(void) {
+void mpuData(){
+  //This function collects the sensor data, convert them into a JSON and send it over websocket everytime it is called
+  
+  /* Get new sensor events with the readings. We will get all the data but not display the temperature as it is not required for our application.
+      The option to not fetch the temp data was not supported by the library as it caused errors on compilation.*/
+  sensors_event_t a, g, temp;
+  //a = accelerometer, g = gyroscope, temp = temperature sensor
+  mpu.getEvent(&a, &g, &temp);
+
+  /*putting sensor readings into the json document*/
+  doc["Xa"]= a.acceleration.x;
+  doc["Ya"]= a.acceleration.y;
+  doc["Za"]= a.acceleration.z;
+  doc["Xr"]= g.gyro.x;
+  doc["Yr"]= g.gyro.y;
+  doc["Zr"]= g.gyro.z;
+
+  serializeJson(doc,output);// Write JSON to output buffer
+  // Alternatively generate a prettified JSON document
+  //serializeJsonPretty(doc, output);
+
+  webSocket.broadcastTXT(doc); // send the JSON object through the websocket
+  doc = ""; // clear the String.
+}
+
+void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
+  switch (type) {
+    case WStype_DISCONNECTED: // enum that read status this is used for debugging.
+      Serial.print("WS Type ");
+      Serial.print(type);
+      Serial.println(": DISCONNECTED");
+      break;
+    case WStype_CONNECTED:  // Check if a WebSocket client is connected or not
+      Serial.print("WS Type ");
+      Serial.print(type);
+      Serial.println(": CONNECTED");
+      if (digitalRead(22) == HIGH) {  //check if pin 22 is high or low
+        pin_status = "ON";
+        update_webpage(); // update the webpage accordingly
+      }
+    }
+}
+
+void setup() {
   Serial.begin(115200);
   
   /*We need to setup WiFi before MPU6050 chip.*/
@@ -128,29 +188,31 @@ void setup(void) {
         Serial.println("MPU6050 chip set successfully!");
       }
   }
+
+  //Code for setup of webserver(could be made into another function
+  Serial.print("IP address : ");
+  Serial.println(WiFi.localIP());
+  
+  // Initialize a web server on the default IP address. and send the webpage as a response.
+  server.on("/", []() {
+    server.send(200, "text", web); //send the html webpage to the server
+  });
+  server.begin(); // init the server
+  webSocket.begin();  // init the Websocketserver
+  webSocket.onEvent(webSocketEvent); //init the webSocketEvent function when a websocket event occurs 
 }
 
 void loop() {
 
-  /* Get new sensor events with the readings. We will get all the data but not display the temperature as it is not required for our application.
-      The option to not fetch the temp data was not supported by the library as it caused errors on compilation.*/
-  sensors_event_t a, g, temp;
-  //a = accelerometer, g = gyroscope, temp = temperature sensor
-  mpu.getEvent(&a, &g, &temp);
+  server.handleClient();  // webserver methode that handles all Client
+  webSocket.loop(); // websocket server methode that handles all Client
+  unsigned long currentMillis = millis();
 
-  /*writing sensor readings into the json document*/
-  doc["Xa"]= a.acceleration.x;
-  doc["Ya"]= a.acceleration.y;
-  doc["Za"]= a.acceleration.z;
-  doc["Xr"]= g.gyro.x;
-  doc["Yr"]= g.gyro.y;
-  doc["Zr"]= g.gyro.z;
+  if ((unsigned long)(currentMillis - previousMillis) >= interval) { // How much time has passed, accounting for rollover with subtraction!
+    mpuData(); //call the function 
+    previousMillis = currentMillis;   // Use the snapshot to set track time until next event
+  }
 
-  serializeJson(doc,output);// Write JSON to output buffer
-  // Alternatively generate a prettified JSON document
-  //serializeJsonPretty(doc, output);
 
-  
-  Serial.println("");
   delay(500);
 }
