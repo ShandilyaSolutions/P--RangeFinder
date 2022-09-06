@@ -90,7 +90,7 @@ void setWebServer(){
     webSocket.onEvent(WebSocketEvent);
 }
 
-int realFunction(){
+void realFunction(){
     /*Code to get sensor readings convert into JSON and send it to webSocket*/
     
     //Create the JSON document
