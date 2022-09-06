@@ -19,6 +19,7 @@ WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
 /*Global variables....*/
+String jsonString;
 bool res;
 char output[1024];
 int interval = 100;
@@ -94,7 +95,7 @@ int realFunction(){
     
     //Create the JSON document
     const int capacity = JSON_OBJECT_SIZE(6);
-    StaticJsonDocument<capacity> json;
+    StaticJsonDocument<capacity> doc;
 
     sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp);
