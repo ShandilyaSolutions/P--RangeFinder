@@ -167,10 +167,6 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
       Serial.print("WS Type ");
       Serial.print(type);
       Serial.println(": CONNECTED");
-      if (digitalRead(22) == HIGH) {  //check if pin 22 is high or low
-        pin_status = "ON";
-        update_webpage(); // update the webpage accordingly
-      }
     }
 }
 
