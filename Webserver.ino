@@ -135,7 +135,7 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length){
     case WStype_TEXT:
         /*Checks response from the client. if the response is 'Compute' then it will call a python function...*/
         Serial.println(payload[0]); //payload variable stores tech status internally
-        if (payload[0]=='COMPUTE'){
+        if (payload[0]==1){
             Serial.println("Calling the Python Function to Compute the Task!"); 
         }
         break;
