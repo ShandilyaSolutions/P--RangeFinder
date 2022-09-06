@@ -112,7 +112,7 @@ int realFunction(){
 
     serializeJson(doc, jsonString); // serialize the object and save teh result to teh string variable.
     Serial.println( jsonString ); // print the string for debugging
-    webSocket.broadcastTXT(doc); //send the JSON document to webSocket
+    webSocket.broadcastTXT(jsonString); //send the JSON document to webSocket
 
     doc = ""; //clears the document for using it again.
 }
