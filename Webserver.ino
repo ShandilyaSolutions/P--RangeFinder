@@ -72,7 +72,7 @@ int setupMpu(){
     return 1;
 }
 
-int setWebServer(){
+void setWebServer(){
     //Code to set up Webserver 
     Serial.print(" IP address : ");
     Serial.println(WiFi.localIP());
@@ -154,6 +154,7 @@ void setup(){
         else if (b==0)
         {
             Serial.println("MPU6050 chip could not be set correctly !");
+            setWebServer();
         }
     }
     else if (a == 0)
