@@ -118,7 +118,7 @@ int realFunction(){
 }
 
 void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length){
-    switch (type){
+    switch (type)
     {
     case WStype_DISCONNECTED:
         Serial.print("WS Type ");
@@ -137,7 +137,6 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length){
         Serial.println(payload[0]); //payload variable stores tech status internally
         if (payload[0]==1){
             Serial.println("Calling the Python Function to Compute the Task!"); 
-        }
         break;
     }
 }
