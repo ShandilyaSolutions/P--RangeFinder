@@ -22,7 +22,7 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 String jsonString;
 bool res;
 char output[1024];
-int interval = 100;
+int interval = 1000;    // later set it to 200 or 250
 unsigned long previousMillis = 0;
 
 /*Website*/
