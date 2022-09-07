@@ -169,5 +169,5 @@ void loop(){
     server.handleClient(); //to handle all server clients
     webSocket.loop();   //to handle all websocket clients
     webSocket.onEvent(WebSocketEvent);  //init the webSocketEvent function when a websocket event occurs 
-    //realFunction();
+    realFunction();
 }
