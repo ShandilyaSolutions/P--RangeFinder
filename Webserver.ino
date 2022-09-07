@@ -150,11 +150,13 @@ void setup(){
         Serial.println("WiFi connection successful");
         b = setupMpu();
         if(b==1)
+        {
             Serial.println("MPU6050 chip set correctly");
+            setWebServer();
+        }
         else if (b==0)
         {
             Serial.println("MPU6050 chip could not be set correctly !");
-            setWebServer();
         }
     }
     else if (a == 0)
