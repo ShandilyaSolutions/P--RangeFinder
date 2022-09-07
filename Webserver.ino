@@ -8,7 +8,7 @@
 //For WiFi
 #include <WiFiManager.h>
 //For sending sensor readings to websocket
-#include <ArduinoJSON.h>
+#include <ArduinoJson.h>
 //For websocket implementation
 #include <WebServer.h>
 #include <WebSocketsServer.h>
