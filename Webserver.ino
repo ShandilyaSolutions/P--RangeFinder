@@ -22,7 +22,7 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 String jsonString;
 bool res;
 char output[1024];
-int interval = 1000;    // later set it to 200 or 250
+int interval = 1000; //later change it to 200 or 250
 unsigned long previousMillis = 0;
 
 /*Website*/
@@ -87,7 +87,7 @@ void setWebServer(){
     server.begin();     //start the server
     webSocket.begin();  //start the websocket
 
-    webSocket.onEvent(WebSocketEvent);
+    //webSocket.onEvent(WebSocketEvent);
 }
 
 void realFunction(){
@@ -111,15 +111,14 @@ void realFunction(){
     //Alternatively : serializeJsonPretty(doc, output);
 
     serializeJson(doc, jsonString); // serialize the object and save teh result to teh string variable.
-    Serial.println( jsonString ); // print the string for debugging
+    //Serial.println( jsonString ); // print the string for debugging
     webSocket.broadcastTXT(jsonString); //send the JSON document to webSocket
 
     doc = ""; //clears the document for using it again.
 }
 
-void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length){
-    switch (type)
-    {
+void WebSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length){
+    switch (type){    
     case WStype_DISCONNECTED:
         Serial.print("WS Type ");
         Serial.print(type);
@@ -137,6 +136,7 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length){
         Serial.println(payload[0]); //payload variable stores tech status internally
         if (payload[0]==1){
             Serial.println("Calling the Python Function to Compute the Task!"); 
+        }
         break;
     }
 }
@@ -149,8 +149,7 @@ void setup(){
     if(a==1){
         Serial.println("WiFi connection successful");
         b = setupMpu();
-        if(b==1)
-        {
+        if(b==1){
             Serial.println("MPU6050 chip set correctly");
             setWebServer();
         }
@@ -167,9 +166,10 @@ void setup(){
     
 }
 
-void loop(){
+void loop()
+{
     server.handleClient(); //to handle all server clients
     webSocket.loop();   //to handle all websocket clients
-    webSocket.onEvent(webSocketEvent);  //init the webSocketEvent function when a websocket event occurs 
+    webSocket.onEvent(WebSocketEvent);  //init the webSocketEvent function when a websocket event occurs 
     realFunction();
 }
