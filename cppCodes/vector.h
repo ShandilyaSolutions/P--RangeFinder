@@ -1,5 +1,5 @@
 /*This is the header file for vector library written by Amritanshu Shiv Shandilya*/
-
+#include <cmath>
 
 void scalarMulti(float x, float y, float z, float c, float *X, float *Y, float *Z)
 {
@@ -10,6 +10,17 @@ void scalarMulti(float x, float y, float z, float c, float *X, float *Y, float *
     *Y = c*y;
     *Z = c*Z;
 }
+
+
+float calcPositionV(float x, float y, float z)
+{
+    // Calculates magnitude of position vector from origin
+    float magnitude;
+    magnitude = (x*x)+(y*y)+(z*z);
+    return sqrtf(magnitude);
+
+}
+
 
 void display(float x, float y, float z)
 {
